@@ -9,8 +9,7 @@ car ;; pop the first element of a list
 cdr ;; the remaining list after a pop
 cons ;; push to the first element of a list
 null ;; isNull() isEmpty()
-
-
+eq ;; ==
 
 
 
