@@ -1,0 +1,19 @@
+;; operators defined in the book
+;; -----------------------------
+(defun atom? (x)
+  (not (listp x)))
+
+;; operators used
+;; --------------
+car ;; pop the first element of a list
+cdr ;; the remaining list after a pop
+cons ;; push to the first element of a list
+null ;; isNull() isEmpty()
+
+
+
+
+
+
+
+
