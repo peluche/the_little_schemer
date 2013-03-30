@@ -10,6 +10,97 @@ cdr ;; the remaining list after a pop
 cons ;; push to the first element of a list
 null ;; isNull() isEmpty()
 eq ;; ==
+cond ;; kind of switch
+or ;; ||
+member ;; x in list ?
+rember ;; remove first instance of x in list
+
+
+;; commandments
+;; ------------
+;; 1- always ask null? as the first question in expressing any function
+;; 2- use cons to build lists
+;; 3- when building a list, describe the first typical element, and then cons it onto the natural recursion
+
+
+;; emacs tips
+;; M-x ielm
+;; M-x eval-buffer
+
+
+;; chapter 02
+;; my version of lat?: (is it cheating to use a "if" ?)
+(defun lat? (x)                                        
+  (if (null x)
+      t
+      (if (atom (car x))
+          (lat? (cdr x))
+          nil))
+)
+;; tests
+(lat? '(Jack Sprat could eat no chicken fat))
+(lat? '((Jack) Sprat could eat no chicken fat))
+(lat? '(Jack (Sprat could) eat no chicken fat))
+(lat? '())
+
+;; official solution
+(defun lat? (l)
+  (cond
+   ((null l) t)
+   ((atom (car l)) (lat? (cdr l)))
+   (t nil)))
+
+;; official member? function translated to emacs lisp
+(defun member? (a lat)
+  (cond
+   ((null lat) nil)
+   (t (or (eq (car lat) a)
+          (member? a (cdr lat))))))
+
+;; my version of rember
+(defun rember (a lat)
+  (cond
+   ((null lat) '())
+   ((eq a (car lat)) (cdr lat))
+   (t (cons (car lat) (rember a (cdr lat))))))
+
+;; my version of firsts
+(defun firsts (l)
+  (cond
+   ((null l) '())
+   (t (cons (car (car l)) (firsts (cdr l))))))
+
+;; my version of insertR
+(defun insertR (new old lat)
+  (cond 
+   ((null lat) '())
+   ((eq (car lat) old) (cons old (cons new (cdr lat))))
+   (t (cons (car lat) (insertR new old (cdr lat))))))
+
+(insertR 'cream 'ice '(ice sandwitch android distribution))
+(insertR 'e 'd '(a b c d))
+(insertR 'e 'd '(a b c d f g d h))
+
+;; my version of insertL
+(defun insertR (new old lat)
+  (cond 
+   ((null lat) '())
+   ((eq (car lat) old) (cons new lat))
+   (t (cons (car lat) (insertR new old (cdr lat))))))
+
+(insertR 'cream 'ice '(ice sandwitch android distribution))
+(insertR 'e 'd '(a b c d))
+(insertR 'e 'd '(a b c d f g d h))
+
+
+
+
+
+
+
+
+
+
 
 
 
