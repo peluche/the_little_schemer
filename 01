@@ -20,7 +20,12 @@ rember ;; remove first instance of x in list
 ;; ------------
 ;; 1- always ask null? as the first question in expressing any function
 ;; 2- use cons to build lists
-;; 3- when building a list, describe the first typical element, and then cons it onto the natural recursion
+;; 3- when building a list, describe the first typical element,
+;;    and then cons it onto the natural recursion
+;; 4- always change at least one argument while recurring.
+;;    it must be changed to be closer to termination.
+;;    the changing argument must be tester in the termination condifiton:
+;;    when using cdr, test termination with null
 
 
 ;; emacs tips
@@ -82,28 +87,107 @@ rember ;; remove first instance of x in list
 (insertR 'e 'd '(a b c d f g d h))
 
 ;; my version of insertL
-(defun insertR (new old lat)
+(defun insertL (new old lat)
   (cond 
    ((null lat) '())
    ((eq (car lat) old) (cons new lat))
-   (t (cons (car lat) (insertR new old (cdr lat))))))
+   (t (cons (car lat) (insertL new old (cdr lat))))))
 
-(insertR 'cream 'ice '(ice sandwitch android distribution))
-(insertR 'e 'd '(a b c d))
-(insertR 'e 'd '(a b c d f g d h))
+(insertL 'cream 'ice '(ice sandwitch android distribution))
+(insertL 'e 'd '(a b c d))
+(insertL 'e 'd '(a b c d f g d h))
 
+;; my version of subst
+(defun subst (new old lat)
+  (cond 
+   ((null lat) '())
+   ((eq (car lat) old) (cons new (cdr lat)))
+   (t (cons (car lat) (subst new old (cdr lat))))))
 
+(subst 'poneys 'horses '(horses are cute))
+(subst 'poneys 'horses '(i really like horses))
+(subst 'poneys 'horses '(the horses are cute and the horses run fast))
 
+;; my version of subst2
+(defun subst2 (new o1 o2 lat)
+  (cond 
+   ((null lat) '())
+   ((eq (car lat) o1) (cons new (cdr lat)))
+   ((eq (car lat) o2) (cons new (cdr lat)))
+   (t (cons (car lat) (subst2 new o1 o2 (cdr lat))))))
 
+(subst2 'lammas 'horses 'poneys '(horses and poneys are cute))
+(subst2 'lammas 'horses 'poneys '(i like poneys))
+(subst2 'lammas 'horses 'poneys '(what is your favorite between poneys and horses))
 
+;; not asked, but i need it for the next one (eq for lists)
+(defun leq (l1 l2)
+  (cond
+   ((and (null l1) (null l2)) t)
+   ((or (null l1) (null l2)) nil)
+   ((eq (car l1) (car l2)) (leq (cdr l1) (cdr l2)))
+   (t nil)))
 
+(leq '(my poney is the cuttest) '(my poney is the cuttest))
+(leq '(my poney is the cuttest) '(your poney is the cuttest))
+(leq '(my poney is the cuttest) '(my poney is teh cuttest))
+(leq '(my poney is the cuttest) '(my poney is the cuttest!))
+(leq '(my poney is the cuttest) '(my poney is the))
+(leq '(my poney is the) '(my poney is the cuttest))
 
+;; my version of multirember (using rember)
+(defun multirember (a lat)
+  (cond
+   ((leq (rember a lat) lat) lat)
+   (t (multirember a (rember a lat)))))
 
+(multirember 'cup '(cup of tea))
+(multirember 'cup '(a tea cup))
+(multirember 'cup '(coffee cup tea cup and hick cup))
 
+;; my second version of multirember
+(defun multirember (a lat)
+  (cond
+   ((null lat) '())
+   ((eq (car lat) a) (multirember a (cdr lat)))
+   (t (cons (car lat) (multirember a (cdr lat))))))
 
+(multirember 'cup '(cup of tea))
+(multirember 'cup '(a tea cup))
+(multirember 'cup '(coffee cup tea cup and hick cup))
 
+;; my version of multiinsertR
+(defun multiinsertR (new old lat)
+  (cond 
+   ((null lat) '())
+   ((eq (car lat) old) (cons old (cons new (multiinsertR new old (cdr lat)))))
+   (t (cons (car lat) (multiinsertR new old (cdr lat))))))
 
+(multiinsertR 'cream 'ice '(ice sandwitch android distribution))
+(multiinsertR 'e 'd '(a b c d))
+(multiinsertR 'e 'd '(a b c d f g d h))
 
+;; my version of multiinsertL
+(defun multiinsertL (new old lat)
+  (cond 
+   ((null lat) '())
+   ((eq (car lat) old) (cons new (cons old (multiinsertL new old (cdr lat)))))
+   (t (cons (car lat) (multiinsertL new old (cdr lat))))))
+
+(multiinsertL 'cream 'ice '(ice sandwitch android distribution))
+(multiinsertL 'e 'd '(a b c d))
+(multiinsertL 'e 'd '(a b c d f g d h))
+
+;; my version of multisubst
+(defun multisubst (new old lat)
+  (cond 
+   ((null lat) '())
+   ((eq (car lat) old) (cons new (multisubst new old (cdr lat))))
+   (t (cons (car lat) (multisubst new old (cdr lat))))))
+
+(multisubst 'poneys 'horses '(horses are cute))
+(multisubst 'poneys 'horses '(i really like horses))
+(multisubst 'poneys 'horses '(the horses are cute and the horses run fast))
 
 
 
