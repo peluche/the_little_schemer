@@ -10,18 +10,22 @@ cdr ;; the remaining list after a pop
 cons ;; push to the first element of a list
 null ;; isNull() isEmpty()
 eq ;; ==
+= ;; == for numbers
 cond ;; kind of switch
 or ;; ||
+and ;; &&
 member ;; x in list ?
 rember ;; remove first instance of x in list
 1+ ;; ++
 1- ;; --
 numberp ;; isNumber()
+atom ;; !isList()
 
 ;; commandments
 ;; ------------
 ;; 1- always ask null as the first question in expressing any function on list
 ;;               zerop                                                    tuple
+;;      ...   (null l) as the first and (atom (car l)) as the second ...  list of S-exp
 ;; 2- use cons to build lists
 ;; 3- when building a list, describe the first typical element,
 ;;    and then cons it onto the natural recursion
@@ -34,10 +38,14 @@ numberp ;; isNumber()
 ;;    + always use 0 for the value of the terminating line because n + 0 = n
 ;;    * always use 1 for the value of the terminating line because n * 1 = n
 ;;    cons always consider '() for the value of the terminating line
+;; 6- simplify only after the function is correct
 
 ;; emacs tips
 ;; M-x ielm
 ;; M-x eval-buffer
+;; "snippet"-ish macro
+(setq last-kbd-macro
+      "\C-a\C-@\C-e\C-[w\C-a;; my version of \C-e\C-m()\C-[ODdefun \C-y ()\C-m\C-m\C-[OA\C-i()\C-[ODcond\C-m\C-m\C-e\C-[[3~\C-[OA\C-i()\C-[OD")
 
 
 ;; chapter 02
@@ -369,6 +377,100 @@ numberp ;; isNumber()
 (one 42)
 (one 11)
 
+;; chapter 05
+;; my version of rember*
+(defun rember* (a l)
+  (cond
+   ((null l) '())
+   ((eq (car l) a) (rember* a (cdr l)))
+   ((atom (car l)) (cons (car l) (rember* a (cdr l))))
+   (t (cons (rember* a (car l)) (rember* a (cdr l))))))
+
+(rember* 'cup '((coffee) cup ((tea) cup) (and (hick)) cup))
+(rember* 'sauce '(((tomato sauce)) ((bean) sauce) (and ((flying)) sauce)))
+
+;; my version of insertR*
+(defun insertR* (new old l)
+  (cond
+   ((null l) '())
+   ((eq (car l) old) (cons old (cons new (insertR* new old (cdr l)))))
+   ((atom (car l)) (cons (car l) (insertR* new old (cdr l))))
+   (t (cons (insertR* new old (car l)) (insertR* new old (cdr l))))))
+
+(insertR* 'roast 'chuck '((how much (wood)) could ((a (wood) chuck))(((chuck)))(if (a) ((wood chuck))) could chuck wood))
+
+;; my version of occur*
+(defun occur* (a l)
+  (cond
+   ((null l) 0)
+   ((eq (car l) a) (1+ (occur* a (cdr l))))
+   ((atom (car l)) (occur* a (cdr l)))
+   (t (+ (occur* a (car l)) (occur* a (cdr l))))))
+
+(occur* 'banana '((banana) (split ((((banana ice))) (cream (banana)) sherbet)) (banana) (bread) (banana brandy)))
+
+;; my version of subst*
+(defun subst* (new old l)
+  (cond
+   ((null l) '())
+   ((eq (car l) old) (cons new (subst* new old (cdr l))))
+   ((atom (car l)) (cons (car l) (subst* new old (cdr l))))
+   (t (cons (subst* new old (car l)) (subst* new old (cdr l))))))
+
+(print (subst* 'orange 'banana '((banana) (split ((((banana ice))) (cream (banana)) sherbet)) (banana) (bread) (banana brandy))))
+
+;; my version of insertL*
+(defun insertL* (new old l)
+  (cond
+   ((null l ) '())
+   ((eq (car l) old) (cons new (cons old (insertL* new old (cdr l)))))
+   ((atom (car l)) (cons (car l) (insertL* new old (cdr l))))
+   (t (cons (insertL* new old (car l)) (insertL* new old (cdr l))))))
+
+(insertL* 'pecker 'chuck '((how much (wood)) could ((a (wood) chuck)) (((chuck))) (if (a) ((wood chuck))) could chuck wood))
+
+;; my version of member*
+(defun member* (a l)
+  (cond
+   ((null l) nil)
+   ((eq (car l) a) t)
+   ((atom (car l)) (member* a (cdr l)))
+   (t (or (member* a (car l)) (member* a (cdr l))))))
+
+(member* 'chips '((potato) (chips ((with) fish) chips)))
+(member* 'chips '((potato) (chips ((with) fish))))
+(member* 'chips '((potato) (((with) fish))))
+
+;; my version of leftmost
+(defun leftmost (l)
+  (cond
+   ((atom (car l)) (car l))
+   (t (leftmost (car l)))))
+
+(leftmost '((potato) (chips ((with) fish) (chips))))
+(leftmost '(((hot) (tuna (and))) cheese))
+(leftmost '(((() four)) 17 (seventeen)))
+(leftmost '())
+
+;; my version of eqlist
+(defun eqlist (l1 l2)
+  (cond
+   ((and (null l1) (null l2)) t)
+   ((and (atom (car l1))
+         (atom (car l2))
+         (eq (car l1) (car l2))) (eqlist (cdr l1) (cdr l2)))
+   ((and (not (atom (car l1)))
+         (not (atom (car l2)))
+         (eqlist (car l1) (car l2)) (eqlist (cdr l1) (cdr l2))))
+   (t nil)))
+
+(eqlist '(strawberry ice cream) '(strawberry ice cream))
+(eqlist '(strawberry ice cream) '(strawberry cream ice))
+(eqlist '() '())
+(eqlist '() '(foo))
+(eqlist '(banana ((split))) '((banana) (split)))
+(eqlist '(beef ((sausage)) (and (soda))) '(beef ((salami)) (and (soda))))
+(eqlist '(beef ((sausage)) (and (soda))) '(beef ((sausage)) (and (soda))))
 
 
 
